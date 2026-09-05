@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Control Pasajes</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --text: #f8fafc;
+      --subtext: #94a3b8;
+      --primary: #38bdf8;
+      --accent: #22c55e;
+      --warn: #ef4444;
+      --border: #334155;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    body { background: var(--bg); color: var(--text); padding: 16px; display: flex; justify-content: center; }
+    .container { width: 100%; max-width: 420px; display: flex; flex-direction: column; gap: 16px; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 16px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.2); }
+    h1 { font-size: 1.25rem; font-weight: 700; color: var(--primary); text-align: center; }
+    h2 { font-size: 0.95rem; font-weight: 600; margin-bottom: 12px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.5px; }
+    .field { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .field label { font-size: 0.9rem; }
+    input[type="number"], select {
+      background: #0b1120; border: 1px solid var(--border); color: #fff;
+      padding: 8px 12px; border-radius: 8px; width: 110px; text-align: right; font-size: 1rem;
+    }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .stat { background: #0b1120; padding: 12px; border-radius: 10px; text-align: center; border: 1px solid var(--border); }
+    .stat .val { font-size: 1.3rem; font-weight: 700; margin-top: 4px; }
+    .stat.primary .val { color: var(--primary); }
+    .stat.warn .val { color: var(--warn); }
+    .stat.accent .val { color: var(--accent); }
+    .label-sm { font-size: 0.75rem; color: var(--subtext); }
+    .banner { padding: 12px; border-radius: 10px; text-align: center; font-weight: 600; font-size: 0.95rem; }
+    .banner.alert { background: rgba(239, 68, 68, 0.15); border: 1px solid var(--warn); color: #fca5a5; }
+    .banner.ok { background: rgba(34, 197, 94, 0.15); border: 1px solid var(--accent); color: #86efac; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>🚍 Presupuesto Transporte</h1>
+
+  <!-- Entradas -->
+  <div class="card">
+    <h2>Tarifas y Frecuencia</h2>
+    <div class="field">
+      <label>Pasaje Ida (S/)</label>
+      <input type="number" id="ida" step="0.10" value="3.00" oninput="calcular()" />
+    </div>
+    <div class="field">
+      <label>Pasaje Vuelta (S/)</label>
+      <input type="number" id="vuelta" step="0.10" value="3.50" oninput="calcular()" />
+    </div>
+    <div class="field">
+      <label>Días de viaje / sem</label>
+      <select id="diasSemana" onchange="calcular()">
+        <option value="5">5 (Lun a Vie)</option>
+        <option value="6">6 (Lun a Sáb)</option>
+        <option value="7">7 (Todos los días)</option>
+        <option value="4">4 días</option>
+        <option value="3">3 días</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Saldo actual disponible (S/)</label>
+      <input type="number" id="saldo" step="0.50" value="20.00" oninput="calcular()" />
+    </div>
+  </div>
+
+  <!-- Resumen del Ciclo -->
+  <div class="card">
+    <h2>Corte al 20 de cada mes</h2>
+    <div class="grid">
+      <div class="stat">
+        <div class="label-sm">Día de corte</div>
+        <div class="val" id="fechaCorte">20 Prox.</div>
+      </div>
+      <div class="stat">
+        <div class="label-sm">Días de viaje restantes</div>
+        <div class="val" id="diasRestantes">0</div>
+      </div>
+      <div class="stat primary">
+        <div class="label-sm">Gasto diario</div>
+        <div class="val" id="gastoDiario">S/ 0.00</div>
+      </div>
+      <div class="stat primary">
+        <div class="label-sm">Necesario hasta el 20</div>
+        <div class="val" id="totalNecesario">S/ 0.00</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Estado del presupuesto -->
+  <div id="resultadoBox" class="banner ok">Calculando...</div>
+</div>
+
+<script>
+  function obtenerProximo20(hoy) {
+    const anio = hoy.getFullYear();
+    const mes = hoy.getMonth();
+    const dia = hoy.getDate();
+
+    let fechaCorte;
+    if (dia < 20) {
+      fechaCorte = new Date(anio, mes, 20);
+    } else {
+      fechaCorte = new Date(anio, mes + 1, 20);
+    }
+    return fechaCorte;
+  }
+
+  function calcularDiasHabiles(desde, hasta, diasPorSemana) {
+    let cuenta = 0;
+    let curr = new Date(desde.getTime());
+    curr.setDate(curr.getDate() + 1); // Empezar a contar a partir de mañana o incluir hoy si aplica
+
+    while (curr <= hasta) {
+      const dayOfWeek = curr.getDay(); // 0 = Domingo, 6 = Sábado
+      if (diasPorSemana === 5 && dayOfWeek >= 1 && dayOfWeek <= 5) cuenta++;
+      else if (diasPorSemana === 6 && dayOfWeek >= 1 && dayOfWeek <= 6) cuenta++;
+      else if (diasPorSemana === 7) cuenta++;
+      else if (diasPorSemana <= 4 && dayOfWeek >= 1 && dayOfWeek <= diasPorSemana) cuenta++;
+      curr.setDate(curr.getDate() + 1);
+    }
+    return Math.max(1, cuenta);
+  }
+
+  function calcular() {
+    const ida = parseFloat(document.getElementById('ida').value) || 0;
+    const vuelta = parseFloat(document.getElementById('vuelta').value) || 0;
+    const diasSemana = parseInt(document.getElementById('diasSemana').value);
+    const saldo = parseFloat(document.getElementById('saldo').value) || 0;
+
+    const hoy = new Date();
+    const proximo20 = obtenerProximo20(hoy);
+
+    // Formato de fecha para el corte
+    const meses = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Set", "Oct", "Nov", "Dic"];
+    document.getElementById('fechaCorte').textContent = `20 ${meses[proximo20.getMonth()]}`;
+
+    const diasRestantes = calcularDiasHabiles(hoy, proximo20, diasSemana);
+    document.getElementById('diasRestantes').textContent = diasRestantes;
+
+    const costoDiario = ida + vuelta;
+    const totalNecesario = diasRestantes * costoDiario;
+    const balance = saldo - totalNecesario;
+
+    document.getElementById('gastoDiario').textContent = `S/ ${costoDiario.toFixed(2)}`;
+    document.getElementById('totalNecesario').textContent = `S/ ${totalNecesario.toFixed(2)}`;
+
+    const resBox = document.getElementById('resultadoBox');
+    if (balance < 0) {
+      resBox.className = "banner alert";
+      resBox.textContent = `Te falta recargar: S/ ${Math.abs(balance).toFixed(2)}`;
+    } else {
+      resBox.className = "banner ok";
+      resBox.textContent = `Cubierto. Saldo restante: S/ ${balance.toFixed(2)}`;
+    }
+
+    // Guardar offline en el celular
+    localStorage.setItem('config_pasajes', JSON.stringify({ ida, vuelta, diasSemana, saldo }));
+  }
+
+  // Cargar datos guardados previamente
+  window.onload = () => {
+    const data = JSON.parse(localStorage.getItem('config_pasajes') || '{}');
+    if (data.ida) document.getElementById('ida').value = data.ida;
+    if (data.vuelta) document.getElementById('vuelta').value = data.vuelta;
+    if (data.diasSemana) document.getElementById('diasSemana').value = data.diasSemana;
+    if (data.saldo) document.getElementById('saldo').value = data.saldo;
+    calcular();
+  };
+</script>
+</body>
+</html>
