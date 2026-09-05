@@ -3,92 +3,72 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Control de Pasajes</title>
+  <title>Control de Finanzas</title>
   
-  <!-- Soporte PWA para Android -->
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#0b0f19" />
 
   <style>
     :root {
-      --bg: #0b0f19;
-      --card: #151d2e;
-      --card-alt: #1c273d;
+      --bg: #090d16;
+      --card: #131b2e;
+      --card-alt: #1a243b;
       --accent: #38bdf8;
       --metro: #f59e0b;
       --micro: #3b82f6;
+      --hormiga: #ec4899;
+      --proyecto: #a855f7;
       --success: #22c55e;
       --danger: #ef4444;
       --text: #f8fafc;
       --muted: #94a3b8;
-      --border: #28354c;
+      --border: #23314a;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
-    body { background: var(--bg); color: var(--text); padding: 12px; display: flex; justify-content: center; }
-    .app { width: 100%; max-width: 480px; display: flex; flex-direction: column; gap: 12px; padding-bottom: 30px; }
+    body { background: var(--bg); color: var(--text); padding: 12px; padding-bottom: 74px; display: flex; justify-content: center; }
+    .app { width: 100%; max-width: 480px; display: flex; flex-direction: column; gap: 12px; }
 
+    /* Navegación inferior */
+    .bottom-nav {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: #0d1527; border-top: 1px solid var(--border);
+      display: flex; justify-content: space-around; padding: 8px 6px; z-index: 90;
+      max-width: 480px; margin: 0 auto;
+    }
+    .nav-item {
+      background: none; border: none; color: var(--muted);
+      display: flex; flex-direction: column; align-items: center; gap: 3px;
+      font-size: 0.68rem; font-weight: 700; cursor: pointer; flex: 1;
+    }
+    .nav-item.active { color: var(--accent); }
+    .nav-item .icon { font-size: 1.15rem; }
+
+    /* Vistas */
+    .tab-content { display: none; flex-direction: column; gap: 12px; }
+    .tab-content.active { display: flex; }
+
+    /* Tarjetas generales */
     .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 12px; }
-    .card-title { font-size: 0.75rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; display: flex; justify-content: space-between; }
+    .card-title { font-size: 0.75rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
 
-    /* Estructura alineada para tarifas */
-    .tramos-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
-    .tramo-box { background: var(--card-alt); border: 1px solid var(--border); border-radius: 8px; padding: 10px; }
-    .tramo-box h4 { font-size: 0.8rem; color: var(--accent); margin-bottom: 8px; text-align: center; }
-    
-    /* Filas alineadas con Grid */
-    .field-row { 
-      display: grid; 
-      grid-template-columns: 1fr 58px; 
-      align-items: center; 
-      gap: 6px; 
-      margin-bottom: 6px; 
-      font-size: 0.75rem; 
-    }
-    .field-row span {
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      color: #cbd5e1;
-    }
-    .field-row input { 
-      width: 100%; 
-      background: #0b0f19; 
-      border: 1px solid var(--border); 
-      border-radius: 6px; 
-      color: #fff; 
-      padding: 5px 4px; 
-      font-size: 0.85rem; 
-      text-align: right; 
-    }
+    /* Grid y filas */
+    .tramos-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+    .tramo-box { background: var(--card-alt); border: 1px solid var(--border); border-radius: 8px; padding: 8px; }
+    .tramo-box h4 { font-size: 0.75rem; color: var(--accent); margin-bottom: 6px; text-align: center; }
+    .field-row { display: grid; grid-template-columns: 1fr 58px; align-items: center; gap: 6px; margin-bottom: 5px; font-size: 0.75rem; }
+    .field-row span { color: #cbd5e1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .field-row input, .field-row select { width: 100%; background: #090d16; border: 1px solid var(--border); border-radius: 6px; color: #fff; padding: 5px; font-size: 0.85rem; text-align: right; }
 
-    .saldo-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: var(--card-alt);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 8px 10px;
-    }
+    .saldo-row { display: flex; justify-content: space-between; align-items: center; background: var(--card-alt); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; }
     .saldo-row span { font-size: 0.8rem; font-weight: 600; }
-    .saldo-row input {
-      width: 85px;
-      background: #0b0f19;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      color: #fff;
-      padding: 5px 6px;
-      font-size: 0.9rem;
-      text-align: right;
-    }
+    .saldo-row input { width: 90px; background: #090d16; border: 1px solid var(--border); border-radius: 6px; color: #fff; padding: 5px 6px; font-size: 0.9rem; text-align: right; }
 
-    /* Resumen Ciclo */
+    /* Resúmenes */
     .summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
     .stat-box { background: var(--card-alt); border: 1px solid var(--border); border-radius: 8px; padding: 8px; text-align: center; }
     .stat-box .title { font-size: 0.65rem; color: var(--muted); }
     .stat-box .val { font-size: 1.05rem; font-weight: 800; margin-top: 2px; }
 
-    /* Alerta */
     .alert-banner { padding: 10px; border-radius: 8px; font-weight: 700; font-size: 0.85rem; text-align: center; }
     .alert-danger { background: rgba(239,68,68,0.15); border: 1px solid var(--danger); color: #fca5a5; }
     .alert-success { background: rgba(34,197,94,0.15); border: 1px solid var(--success); color: #86efac; }
@@ -99,12 +79,11 @@
     .cal-nav { background: var(--card-alt); border: 1px solid var(--border); color: #fff; border-radius: 6px; padding: 4px 8px; font-size: 0.75rem; cursor: pointer; }
     .weekdays { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-size: 0.65rem; color: var(--muted); font-weight: 700; margin-bottom: 4px; }
     .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
-
-    .day-cell { min-height: 52px; background: var(--card-alt); border: 1px solid var(--border); border-radius: 6px; padding: 4px; display: flex; flex-direction: column; justify-content: space-between; cursor: pointer; }
+    .day-cell { min-height: 50px; background: var(--card-alt); border: 1px solid var(--border); border-radius: 6px; padding: 4px; display: flex; flex-direction: column; justify-content: space-between; cursor: pointer; }
     .day-cell.other-month { opacity: 0.25; }
     .day-cell.today { border-color: var(--accent); }
     .day-cell.is-corte { background: rgba(56,189,248,0.12); border-color: var(--accent); }
-    .day-cell.custom-day { border-color: #ec4899; }
+    .day-cell.custom-day { border-color: var(--hormiga); }
     .day-top { display: flex; justify-content: space-between; align-items: center; }
     .day-top .num { font-size: 0.75rem; font-weight: 700; }
     .badges { display: flex; gap: 2px; }
@@ -113,106 +92,271 @@
     .badge-metro { background: var(--metro); color: #000; }
     .day-cell .cost { font-size: 0.65rem; text-align: right; font-weight: 700; }
 
-    /* Modal */
-    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); display: none; align-items: center; justify-content: center; z-index: 100; padding: 16px; }
-    .modal { background: var(--card); border: 1px solid var(--border); border-radius: 12px; width: 100%; max-width: 330px; padding: 16px; }
-    .modal h4 { font-size: 0.95rem; color: var(--accent); margin-bottom: 12px; text-align: center; }
-    .modal-section { margin-bottom: 10px; background: var(--card-alt); padding: 8px; border-radius: 8px; border: 1px solid var(--border); }
-    .modal-section-title { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; font-weight: 700; margin-bottom: 6px; }
-    .modal-actions { display: flex; gap: 8px; margin-top: 14px; }
-    .btn { flex: 1; padding: 8px; border-radius: 6px; border: none; font-weight: 700; font-size: 0.8rem; cursor: pointer; }
+    /* Módulos Hormiga y Proyectos */
+    .form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px; }
+    .form-group label { font-size: 0.75rem; color: var(--muted); }
+    .form-group input, .form-group select { background: #090d16; border: 1px solid var(--border); border-radius: 6px; color: #fff; padding: 8px; font-size: 0.85rem; }
+    .btn { padding: 9px 12px; border-radius: 6px; border: none; font-weight: 700; font-size: 0.8rem; cursor: pointer; }
     .btn-primary { background: var(--accent); color: #090d16; }
     .btn-secondary { background: var(--card-alt); color: #fff; border: 1px solid var(--border); }
+    .btn-hormiga { background: var(--hormiga); color: #fff; }
+    .btn-proyecto { background: var(--proyecto); color: #fff; }
+
+    .item-list { display: flex; flex-direction: column; gap: 6px; max-height: 280px; overflow-y: auto; }
+    .list-item { background: var(--card-alt); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; display: flex; justify-content: space-between; align-items: center; }
+    .list-item .meta { display: flex; flex-direction: column; gap: 2px; }
+    .list-item .desc { font-size: 0.8rem; font-weight: 600; }
+    .list-item .tag { font-size: 0.68rem; color: var(--muted); }
+    .list-item .amount { font-size: 0.9rem; font-weight: 800; }
+    .list-item .btn-del { background: none; border: none; color: var(--danger); font-size: 0.9rem; margin-left: 8px; cursor: pointer; }
+
+    /* Barra de progreso proyectos */
+    .prog-bar-bg { width: 100%; background: #090d16; border: 1px solid var(--border); border-radius: 10px; height: 12px; overflow: hidden; margin: 6px 0; }
+    .prog-bar-fill { height: 100%; background: var(--proyecto); width: 0%; transition: width 0.3s ease; }
+
+    /* Modales */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 100; padding: 16px; }
+    .modal { background: var(--card); border: 1px solid var(--border); border-radius: 12px; width: 100%; max-width: 330px; padding: 16px; }
+    .modal h4 { font-size: 0.95rem; color: var(--accent); margin-bottom: 10px; text-align: center; }
+    .modal-section { margin-bottom: 8px; background: var(--card-alt); padding: 8px; border-radius: 8px; border: 1px solid var(--border); }
+    .modal-section-title { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; font-weight: 700; margin-bottom: 6px; }
+    .modal-actions { display: flex; gap: 8px; margin-top: 12px; }
   </style>
 </head>
 <body>
 
 <div class="app">
-  <!-- Configuración habitual -->
-  <div class="card">
-    <div class="card-title">
-      <span>Tarifas Habituales</span>
-      <span style="color: var(--accent);" id="labelGastoDiarioBase">Diario: S/ 0.00</span>
-    </div>
-    
-    <div class="tramos-grid">
-      <!-- IDA -->
-      <div class="tramo-box">
-        <h4>Ida</h4>
-        <div class="field-row">
-          <span>Micro</span>
-          <input type="number" id="baseIdaMicro" step="0.10" value="1.50" onchange="guardarBase()" />
+
+  <!-- ================= VISTA 1: TRANSPORTE ================= -->
+  <section id="tab-transporte" class="tab-content active">
+    <div class="card">
+      <div class="card-title">
+        <span>Tarifas Habituales</span>
+        <span style="color: var(--accent);" id="labelGastoDiarioBase">Diario: S/ 0.00</span>
+      </div>
+      <div class="tramos-grid">
+        <div class="tramo-box">
+          <h4>Ida</h4>
+          <div class="field-row">
+            <span>Micro</span>
+            <input type="number" id="baseIdaMicro" step="0.10" value="1.50" onchange="guardarBaseTransporte()" />
+          </div>
+          <div class="field-row">
+            <span>Metropolitano</span>
+            <input type="number" id="baseIdaMetro" step="0.10" value="3.20" onchange="guardarBaseTransporte()" />
+          </div>
         </div>
-        <div class="field-row">
-          <span>Metropolitano</span>
-          <input type="number" id="baseIdaMetro" step="0.10" value="3.20" onchange="guardarBase()" />
+        <div class="tramo-box">
+          <h4>Vuelta</h4>
+          <div class="field-row">
+            <span>Metropolitano</span>
+            <input type="number" id="baseVueltaMetro" step="0.10" value="3.20" onchange="guardarBaseTransporte()" />
+          </div>
+          <div class="field-row">
+            <span>Micro</span>
+            <input type="number" id="baseVueltaMicro" step="0.10" value="1.50" onchange="guardarBaseTransporte()" />
+          </div>
         </div>
       </div>
+      <div class="saldo-row">
+        <span>Saldo tarjeta / pasajes</span>
+        <input type="number" id="saldoActual" step="0.50" value="50.00" onchange="calcularTodoTransporte()" />
+      </div>
+    </div>
 
-      <!-- VUELTA -->
-      <div class="tramo-box">
-        <h4>Vuelta</h4>
-        <div class="field-row">
-          <span>Metropolitano</span>
-          <input type="number" id="baseVueltaMetro" step="0.10" value="3.20" onchange="guardarBase()" />
+    <div class="card">
+      <div class="card-title">
+        <span id="labelCicloTransporte">Corte: 20 de ...</span>
+        <span style="color: var(--muted);">Proyección</span>
+      </div>
+      <div class="summary-grid">
+        <div class="stat-box">
+          <div class="title">Días viaje</div>
+          <div class="val" id="diasRestantes">0</div>
         </div>
-        <div class="field-row">
-          <span>Micro</span>
-          <input type="number" id="baseVueltaMicro" step="0.10" value="1.50" onchange="guardarBase()" />
+        <div class="stat-box">
+          <div class="title">Total al 20</div>
+          <div class="val" id="totalCiclo">S/ 0.00</div>
+        </div>
+        <div class="stat-box">
+          <div class="title">Saldo rest.</div>
+          <div class="val" id="saldoRestante">S/ 0.00</div>
         </div>
       </div>
     </div>
 
-    <!-- Saldo disponible -->
-    <div class="saldo-row">
-      <span>Saldo disponible (tarjeta/mano)</span>
-      <input type="number" id="saldoActual" step="0.50" value="50.00" onchange="calcularTodo()" />
-    </div>
-  </div>
+    <div id="bannerEstadoTransporte" class="alert-banner alert-danger">Calculando...</div>
 
-  <!-- Resumen Ciclo -->
-  <div class="card">
-    <div class="card-title">
-      <span id="labelCiclo">Corte: 20 de ...</span>
-      <span style="color: var(--muted);">Proyección</span>
+    <div class="card">
+      <div class="cal-header">
+        <button class="cal-nav" onclick="cambiarMesTransporte(-1)">◀</button>
+        <h3 id="calTitulo">Mes Año</h3>
+        <button class="cal-nav" onclick="cambiarMesTransporte(1)">▶</button>
+      </div>
+      <div class="weekdays">
+        <div>D</div><div>L</div><div>M</div><div>M</div><div>J</div><div>V</div><div>S</div>
+      </div>
+      <div class="calendar-grid" id="gridDias"></div>
     </div>
-    <div class="summary-grid">
-      <div class="stat-box">
-        <div class="title">Días viaje</div>
-        <div class="val" id="diasRestantes">0</div>
-      </div>
-      <div class="stat-box">
-        <div class="title">Total al 20</div>
-        <div class="val" id="totalCiclo">S/ 0.00</div>
-      </div>
-      <div class="stat-box">
-        <div class="title">Saldo rest.</div>
-        <div class="val" id="saldoRestante">S/ 0.00</div>
-      </div>
-    </div>
-  </div>
+  </section>
 
-  <div id="bannerEstado" class="alert-banner alert-danger">Calculando...</div>
+  <!-- ================= VISTA 2: GASTOS HORMIGA ================= -->
+  <section id="tab-hormiga" class="tab-content">
+    <div class="card">
+      <div class="card-title">
+        <span>Nuevo Gasto Rápido</span>
+        <span style="color: var(--hormiga);">Fugas de Dinero</span>
+      </div>
+      <div class="form-group">
+        <label>Monto (S/)</label>
+        <input type="number" id="hormigaMonto" step="0.50" placeholder="Ej: 3.50" />
+      </div>
+      <div class="form-group">
+        <label>Descripción / Concepto</label>
+        <input type="text" id="hormigaDesc" placeholder="Ej: Galletas, café, jugo, recarga" />
+      </div>
+      <div class="form-group">
+        <label>Categoría</label>
+        <select id="hormigaCat">
+          <option value="Snacks y Antojos">🍬 Snacks y Antojos</option>
+          <option value="Bebidas / Café">☕ Bebidas / Café</option>
+          <option value="Comisiones / Servicios">💳 Comisiones / Servicios</option>
+          <option value="Impresiones / Copias">📄 Impresiones / Papelería</option>
+          <option value="Otros">📦 Otros</option>
+        </select>
+      </div>
+      <button class="btn btn-hormiga" style="width: 100%; margin-top: 4px;" onclick="agregarGastoHormiga()">+ Registrar Gasto Hormiga</button>
+    </div>
 
-  <!-- Calendario -->
-  <div class="card">
-    <div class="cal-header">
-      <button class="cal-nav" onclick="cambiarMes(-1)">◀</button>
-      <h3 id="calTitulo">Mes Año</h3>
-      <button class="cal-nav" onclick="cambiarMes(1)">▶</button>
+    <div class="card">
+      <div class="card-title">
+        <span>Historial del Ciclo</span>
+        <span id="totalHormigaLabel" style="color: var(--hormiga); font-weight: 800;">Total: S/ 0.00</span>
+      </div>
+      <div class="item-list" id="listaHormiga">
+        <!-- Elementos generados dinámicamente -->
+      </div>
     </div>
-    <div class="weekdays">
-      <div>D</div><div>L</div><div>M</div><div>M</div><div>J</div><div>V</div><div>S</div>
+  </section>
+
+  <!-- ================= VISTA 3: PROYECTOS ================= -->
+  <section id="tab-proyectos" class="tab-content">
+    <div class="card">
+      <div class="card-title">
+        <span>Gestor de Proyectos</span>
+        <span style="color: var(--proyecto);">Materiales & Prototipos</span>
+      </div>
+      <div class="form-group">
+        <label>Proyecto activo</label>
+        <select id="selectProyectos" onchange="seleccionarProyectoActivo()"></select>
+      </div>
+      <div style="display: flex; gap: 6px;">
+        <button class="btn btn-secondary" style="flex: 1;" onclick="abrirModalNuevoProyecto()">+ Crear Proyecto</button>
+        <button class="btn btn-secondary" style="color: var(--danger);" onclick="eliminarProyectoActual()">Eliminar</button>
+      </div>
     </div>
-    <div class="calendar-grid" id="gridDias"></div>
-  </div>
+
+    <div class="card" id="cardDetalleProyecto">
+      <div class="card-title">
+        <span id="proyNombreDisplay">Proyecto</span>
+        <span id="proyPresupuestoDisplay" style="color: var(--muted);">Presupuesto: S/ 0.00</span>
+      </div>
+      
+      <div class="prog-bar-bg">
+        <div class="prog-bar-fill" id="proyBarraProgreso"></div>
+      </div>
+      <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--muted); margin-bottom: 10px;">
+        <span id="proyGastadoDisplay">Gastado: S/ 0.00</span>
+        <span id="proyRestanteDisplay">Restante: S/ 0.00</span>
+      </div>
+
+      <!-- Registrar gasto dentro del proyecto -->
+      <div style="background: var(--card-alt); border: 1px solid var(--border); border-radius: 8px; padding: 10px; margin-bottom: 10px;">
+        <div style="font-size: 0.75rem; font-weight: 700; color: var(--proyecto); margin-bottom: 6px;">Añadir compra / insumo</div>
+        <div class="field-row" style="grid-template-columns: 1fr 80px;">
+          <input type="text" id="proyItemDesc" placeholder="Item (ej: Sensor, Filamento)" style="text-align: left;" />
+          <input type="number" id="proyItemCosto" step="0.50" placeholder="S/ Costo" />
+        </div>
+        <button class="btn btn-proyecto" style="width: 100%; margin-top: 4px;" onclick="agregarGastoAProyecto()">+ Añadir al Proyecto</button>
+      </div>
+
+      <div class="item-list" id="listaItemsProyecto"></div>
+    </div>
+  </section>
+
+  <!-- ================= VISTA 4: RESUMEN GLOBAL ================= -->
+  <section id="tab-global" class="tab-content">
+    <div class="card">
+      <div class="card-title">
+        <span>Balance Consolidado del Ciclo</span>
+        <span style="color: var(--accent);">Al día 20</span>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <div class="list-item">
+          <div class="meta">
+            <span class="desc">🚍 Transporte (Proyectado al 20)</span>
+            <span class="tag">Micro + Metropolitano</span>
+          </div>
+          <span class="amount" id="globalTransporte" style="color: var(--accent);">S/ 0.00</span>
+        </div>
+
+        <div class="list-item">
+          <div class="meta">
+            <span class="desc">🍬 Gastos Hormiga Acumulados</span>
+            <span class="tag">Pequeñas compras y consumos</span>
+          </div>
+          <span class="amount" id="globalHormiga" style="color: var(--hormiga);">S/ 0.00</span>
+        </div>
+
+        <div class="list-item">
+          <div class="meta">
+            <span class="desc">🛠️ Proyectos (Gasto Real)</span>
+            <span class="tag">Materiales e insumos comprados</span>
+          </div>
+          <span class="amount" id="globalProyectos" style="color: var(--proyecto);">S/ 0.00</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="background: #111a30; border-color: var(--accent);">
+      <div class="card-title">
+        <span style="color: #fff;">Compromiso Total del Ciclo</span>
+      </div>
+      <div style="font-size: 1.8rem; font-weight: 800; text-align: center; color: var(--accent); margin: 6px 0;" id="granTotalGlobal">
+        S/ 0.00
+      </div>
+      <div style="font-size: 0.75rem; text-align: center; color: var(--muted);">
+        Presupuesto mínimo que debes tener asignado para cubrir tus pasajes y consumos hasta el próximo día 20.
+      </div>
+    </div>
+  </section>
+
 </div>
 
-<!-- Modal para personalizar día puntual -->
+<!-- Barra de Navegación Inferior -->
+<nav class="bottom-nav">
+  <button class="nav-item active" onclick="cambiarTab('tab-transporte', this)">
+    <span class="icon">🚍</span>
+    <span>Transporte</span>
+  </button>
+  <button class="nav-item" onclick="cambiarTab('tab-hormiga', this)">
+    <span class="icon">🍬</span>
+    <span>Hormiga</span>
+  </button>
+  <button class="nav-item" onclick="cambiarTab('tab-proyectos', this)">
+    <span class="icon">🛠️</span>
+    <span>Proyectos</span>
+  </button>
+  <button class="nav-item" onclick="cambiarTab('tab-global', this)">
+    <span class="icon">📊</span>
+    <span>Resumen</span>
+  </button>
+</nav>
+
+<!-- Modal Día Transporte -->
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal">
     <h4 id="modalFechaTitulo">Configurar Día</h4>
-
     <div class="modal-section">
       <div class="modal-section-title">Ida</div>
       <div class="field-row">
@@ -224,7 +368,6 @@
         <input type="number" id="modIdaMetro" step="0.10" />
       </div>
     </div>
-
     <div class="modal-section">
       <div class="modal-section-title">Vuelta</div>
       <div class="field-row">
@@ -236,12 +379,10 @@
         <input type="number" id="modVueltaMicro" step="0.10" />
       </div>
     </div>
-
-    <div style="display: flex; gap: 6px; margin-top: 10px;">
+    <div style="display: flex; gap: 6px; margin-top: 8px;">
       <button class="btn btn-secondary" onclick="setearDiaCero()">Sin viaje (S/ 0)</button>
       <button class="btn btn-secondary" onclick="resetearADefault()">Restablecer Base</button>
     </div>
-
     <div class="modal-actions">
       <button class="btn btn-secondary" onclick="cerrarModal()">Cancelar</button>
       <button class="btn btn-primary" onclick="guardarModalDia()">Guardar</button>
@@ -249,20 +390,48 @@
   </div>
 </div>
 
+<!-- Modal Nuevo Proyecto -->
+<div class="modal-overlay" id="modalProyectoOverlay">
+  <div class="modal">
+    <h4 style="color: var(--proyecto);">Nuevo Proyecto</h4>
+    <div class="form-group">
+      <label>Nombre del proyecto</label>
+      <input type="text" id="nuevoProyNombre" placeholder="Ej: Dispositivo IoT, Maqueta" />
+    </div>
+    <div class="form-group">
+      <label>Presupuesto techo (S/)</label>
+      <input type="number" id="nuevoProyPresupuesto" step="5.00" placeholder="Ej: 150.00" />
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="cerrarModalNuevoProyecto()">Cancelar</button>
+      <button class="btn btn-proyecto" onclick="guardarNuevoProyecto()">Crear</button>
+    </div>
+  </div>
+</div>
+
 <script>
+  /* ================= NAVEGACIÓN TABS ================= */
+  function cambiarTab(tabId, btn) {
+    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+    document.getElementById(tabId).classList.add('active');
+    btn.classList.add('active');
+    
+    if (tabId === 'tab-global') renderResumenGlobal();
+    if (tabId === 'tab-proyectos') renderProyectos();
+    if (tabId === 'tab-hormiga') renderHormiga();
+    if (tabId === 'tab-transporte') calcularTodoTransporte();
+  }
+
+  /* ================= MÓDULO 1: TRANSPORTE ================= */
   let mesVisual = new Date().getMonth();
   let anioVisual = new Date().getFullYear();
   let diaSeleccionadoKey = null;
 
-  let config = JSON.parse(localStorage.getItem('transporte_config') || JSON.stringify({
-    idaMicro: 1.50,
-    idaMetro: 3.20,
-    vueltaMetro: 3.20,
-    vueltaMicro: 1.50,
-    saldo: 50.00
+  let confTrans = JSON.parse(localStorage.getItem('transporte_config') || JSON.stringify({
+    idaMicro: 1.50, idaMetro: 3.20, vueltaMetro: 3.20, vueltaMicro: 1.50, saldo: 50.00
   }));
-
-  let diasCustom = JSON.parse(localStorage.getItem('dias_custom_transporte') || '{}');
+  let diasCustomTrans = JSON.parse(localStorage.getItem('dias_custom_transporte') || '{}');
 
   function formatoKey(d) {
     const y = d.getFullYear();
@@ -271,84 +440,66 @@
     return `${y}-${m}-${dia}`;
   }
 
-  function getDetalleDia(fecha) {
+  function getDetalleDiaTrans(fecha) {
     const key = formatoKey(fecha);
-    if (diasCustom[key]) {
-      return { ...diasCustom[key], custom: true };
-    }
+    if (diasCustomTrans[key]) return { ...diasCustomTrans[key], custom: true };
     const dayOfWeek = fecha.getDay();
-    if (dayOfWeek === 0 || dayOfWeek === 6) {
-      return { idaMicro: 0, idaMetro: 0, vueltaMetro: 0, vueltaMicro: 0, custom: false };
-    }
-    return {
-      idaMicro: config.idaMicro,
-      idaMetro: config.idaMetro,
-      vueltaMetro: config.vueltaMetro,
-      vueltaMicro: config.vueltaMicro,
-      custom: false
-    };
+    if (dayOfWeek === 0 || dayOfWeek === 6) return { idaMicro: 0, idaMetro: 0, vueltaMetro: 0, vueltaMicro: 0, custom: false };
+    return { idaMicro: confTrans.idaMicro, idaMetro: confTrans.idaMetro, vueltaMetro: confTrans.vueltaMetro, vueltaMicro: confTrans.vueltaMicro, custom: false };
   }
 
-  function sumaDia(detalle) {
+  function sumaDiaTrans(detalle) {
     return (detalle.idaMicro || 0) + (detalle.idaMetro || 0) + (detalle.vueltaMetro || 0) + (detalle.vueltaMicro || 0);
   }
 
-  function guardarBase() {
-    config.idaMicro = parseFloat(document.getElementById('baseIdaMicro').value) || 0;
-    config.idaMetro = parseFloat(document.getElementById('baseIdaMetro').value) || 0;
-    config.vueltaMetro = parseFloat(document.getElementById('baseVueltaMetro').value) || 0;
-    config.vueltaMicro = parseFloat(document.getElementById('baseVueltaMicro').value) || 0;
-    localStorage.setItem('transporte_config', JSON.stringify(config));
-    calcularTodo();
+  function guardarBaseTransporte() {
+    confTrans.idaMicro = parseFloat(document.getElementById('baseIdaMicro').value) || 0;
+    confTrans.idaMetro = parseFloat(document.getElementById('baseIdaMetro').value) || 0;
+    confTrans.vueltaMetro = parseFloat(document.getElementById('baseVueltaMetro').value) || 0;
+    confTrans.vueltaMicro = parseFloat(document.getElementById('baseVueltaMicro').value) || 0;
+    localStorage.setItem('transporte_config', JSON.stringify(confTrans));
+    calcularTodoTransporte();
   }
 
-  function cambiarMes(offset) {
+  function cambiarMesTransporte(offset) {
     mesVisual += offset;
     if (mesVisual < 0) { mesVisual = 11; anioVisual--; }
     else if (mesVisual > 11) { mesVisual = 0; anioVisual++; }
-    renderCalendario();
+    renderCalendarioTransporte();
   }
 
-  function renderCalendario() {
-    const nombresMes = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
-    document.getElementById('calTitulo').textContent = `${nombresMes[mesVisual]} ${anioVisual}`;
-
+  function renderCalendarioTransporte() {
+    const meses = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+    document.getElementById('calTitulo').textContent = `${meses[mesVisual]} ${anioVisual}`;
     const grid = document.getElementById('gridDias');
     grid.innerHTML = '';
 
-    const primerDiaSemana = new Date(anioVisual, mesVisual, 1).getDay();
-    const totalDiasMes = new Date(anioVisual, mesVisual + 1, 0).getDate();
-    const totalDiasAnt = new Date(anioVisual, mesVisual, 0).getDate();
-
+    const primerDia = new Date(anioVisual, mesVisual, 1).getDay();
+    const totalMes = new Date(anioVisual, mesVisual + 1, 0).getDate();
+    const totalAnt = new Date(anioVisual, mesVisual, 0).getDate();
     const hoyKey = formatoKey(new Date());
 
-    for (let i = primerDiaSemana - 1; i >= 0; i--) {
-      const d = new Date(anioVisual, mesVisual - 1, totalDiasAnt - i);
-      grid.appendChild(crearCelda(d, true));
+    for (let i = primerDia - 1; i >= 0; i--) {
+      grid.appendChild(crearCeldaTrans(new Date(anioVisual, mesVisual - 1, totalAnt - i), true));
     }
-
-    for (let dia = 1; dia <= totalDiasMes; dia++) {
+    for (let dia = 1; dia <= totalMes; dia++) {
       const d = new Date(anioVisual, mesVisual, dia);
-      grid.appendChild(crearCelda(d, false, formatoKey(d) === hoyKey));
+      grid.appendChild(crearCeldaTrans(d, false, formatoKey(d) === hoyKey));
     }
-
-    const totalCeldas = grid.children.length;
-    const celdasRestantes = (7 - (totalCeldas % 7)) % 7;
+    const celdasRestantes = (7 - (grid.children.length % 7)) % 7;
     for (let i = 1; i <= celdasRestantes; i++) {
-      const d = new Date(anioVisual, mesVisual + 1, i);
-      grid.appendChild(crearCelda(d, true));
+      grid.appendChild(crearCeldaTrans(new Date(anioVisual, mesVisual + 1, i), true));
     }
   }
 
-  function crearCelda(fecha, esOtroMes, esHoy = false) {
+  function crearCeldaTrans(fecha, esOtroMes, esHoy = false) {
     const el = document.createElement('div');
-    const detalle = getDetalleDia(fecha);
-    const total = sumaDia(detalle);
+    const detalle = getDetalleDiaTrans(fecha);
+    const total = sumaDiaTrans(detalle);
     const usaMicro = (detalle.idaMicro > 0 || detalle.vueltaMicro > 0);
     const usaMetro = (detalle.idaMetro > 0 || detalle.vueltaMetro > 0);
 
     el.className = `day-cell ${esOtroMes ? 'other-month' : ''} ${esHoy ? 'today' : ''} ${detalle.custom ? 'custom-day' : ''} ${fecha.getDate() === 20 ? 'is-corte' : ''}`;
-    
     el.innerHTML = `
       <div class="day-top">
         <span class="num">${fecha.getDate()}</span>
@@ -357,31 +508,26 @@
           ${usaMetro ? '<span class="badge badge-metro">T</span>' : ''}
         </div>
       </div>
-      <div class="cost" style="color: ${total > 0 ? (detalle.custom ? '#f472b6' : 'var(--accent)') : 'var(--muted)'}">
+      <div class="cost" style="color: ${total > 0 ? (detalle.custom ? 'var(--hormiga)' : 'var(--accent)') : 'var(--muted)'}">
         ${total > 0 ? 'S/' + total.toFixed(1) : '-'}
       </div>
     `;
-
-    el.onclick = () => abrirModal(fecha);
+    el.onclick = () => abrirModalTrans(fecha);
     return el;
   }
 
-  function abrirModal(fecha) {
+  function abrirModalTrans(fecha) {
     diaSeleccionadoKey = formatoKey(fecha);
-    const detalle = getDetalleDia(fecha);
-
+    const detalle = getDetalleDiaTrans(fecha);
     document.getElementById('modalFechaTitulo').textContent = `Día ${diaSeleccionadoKey}`;
     document.getElementById('modIdaMicro').value = detalle.idaMicro.toFixed(2);
     document.getElementById('modIdaMetro').value = detalle.idaMetro.toFixed(2);
     document.getElementById('modVueltaMetro').value = detalle.vueltaMetro.toFixed(2);
     document.getElementById('modVueltaMicro').value = detalle.vueltaMicro.toFixed(2);
-
     document.getElementById('modalOverlay').style.display = 'flex';
   }
 
-  function cerrarModal() {
-    document.getElementById('modalOverlay').style.display = 'none';
-  }
+  function cerrarModal() { document.getElementById('modalOverlay').style.display = 'none'; }
 
   function setearDiaCero() {
     document.getElementById('modIdaMicro').value = "0.00";
@@ -391,81 +537,284 @@
   }
 
   function resetearADefault() {
-    delete diasCustom[diaSeleccionadoKey];
-    localStorage.setItem('dias_custom_transporte', JSON.stringify(diasCustom));
+    delete diasCustomTrans[diaSeleccionadoKey];
+    localStorage.setItem('dias_custom_transporte', JSON.stringify(diasCustomTrans));
     cerrarModal();
-    calcularTodo();
+    calcularTodoTransporte();
   }
 
   function guardarModalDia() {
-    diasCustom[diaSeleccionadoKey] = {
+    diasCustomTrans[diaSeleccionadoKey] = {
       idaMicro: parseFloat(document.getElementById('modIdaMicro').value) || 0,
       idaMetro: parseFloat(document.getElementById('modIdaMetro').value) || 0,
       vueltaMetro: parseFloat(document.getElementById('modVueltaMetro').value) || 0,
       vueltaMicro: parseFloat(document.getElementById('modVueltaMicro').value) || 0
     };
-    localStorage.setItem('dias_custom_transporte', JSON.stringify(diasCustom));
+    localStorage.setItem('dias_custom_transporte', JSON.stringify(diasCustomTrans));
     cerrarModal();
-    calcularTodo();
+    calcularTodoTransporte();
   }
 
-  function calcularTodo() {
-    const gastoBaseDiario = (config.idaMicro + config.idaMetro + config.vueltaMetro + config.vueltaMicro);
-    document.getElementById('labelGastoDiarioBase').textContent = `Diario: S/ ${gastoBaseDiario.toFixed(2)}`;
+  let totalTransporteProyectado = 0;
 
-    config.saldo = parseFloat(document.getElementById('saldoActual').value) || 0;
-    localStorage.setItem('transporte_config', JSON.stringify(config));
+  function calcularTodoTransporte() {
+    const diarioBase = confTrans.idaMicro + confTrans.idaMetro + confTrans.vueltaMetro + confTrans.vueltaMicro;
+    document.getElementById('labelGastoDiarioBase').textContent = `Diario: S/ ${diarioBase.toFixed(2)}`;
+    confTrans.saldo = parseFloat(document.getElementById('saldoActual').value) || 0;
+    localStorage.setItem('transporte_config', JSON.stringify(confTrans));
 
-    renderCalendario();
+    renderCalendarioTransporte();
 
     const hoy = new Date();
-    const diaActual = hoy.getDate();
-    let fechaFin;
-
-    if (diaActual <= 20) {
-      fechaFin = new Date(hoy.getFullYear(), hoy.getMonth(), 20);
-    } else {
-      fechaFin = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 20);
-    }
+    let fechaFin = (hoy.getDate() <= 20) 
+      ? new Date(hoy.getFullYear(), hoy.getMonth(), 20) 
+      : new Date(hoy.getFullYear(), hoy.getMonth() + 1, 20);
 
     const meses = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Set","Oct","Nov","Dic"];
-    document.getElementById('labelCiclo').textContent = `Corte: 20 de ${meses[fechaFin.getMonth()]}`;
+    document.getElementById('labelCicloTransporte').textContent = `Corte: 20 de ${meses[fechaFin.getMonth()]}`;
 
-    let totalGasto = 0;
+    let gastoAcumulado = 0;
     let diasConViaje = 0;
     let cursor = new Date(hoy.getTime());
 
     while (cursor <= fechaFin) {
-      const detalle = getDetalleDia(cursor);
-      const totalDia = sumaDia(detalle);
-      totalGasto += totalDia;
-      if (totalDia > 0) diasConViaje++;
+      const detalle = getDetalleDiaTrans(cursor);
+      const subtotal = sumaDiaTrans(detalle);
+      gastoAcumulado += subtotal;
+      if (subtotal > 0) diasConViaje++;
       cursor.setDate(cursor.getDate() + 1);
     }
 
+    totalTransporteProyectado = gastoAcumulado;
     document.getElementById('diasRestantes').textContent = diasConViaje;
-    document.getElementById('totalCiclo').textContent = `S/ ${totalGasto.toFixed(2)}`;
+    document.getElementById('totalCiclo').textContent = `S/ ${totalTransporteProyectado.toFixed(2)}`;
 
-    const balance = config.saldo - totalGasto;
+    const balance = confTrans.saldo - totalTransporteProyectado;
     document.getElementById('saldoRestante').textContent = `S/ ${balance.toFixed(2)}`;
 
-    const banner = document.getElementById('bannerEstado');
+    const banner = document.getElementById('bannerEstadoTransporte');
     if (balance < 0) {
       banner.className = 'alert-banner alert-danger';
-      banner.textContent = `Faltan S/ ${Math.abs(balance).toFixed(2)} para completar el ciclo al 20`;
+      banner.textContent = `Faltan S/ ${Math.abs(balance).toFixed(2)} para cerrar al 20`;
     } else {
       banner.className = 'alert-banner alert-success';
-      banner.textContent = `Cubierto. Te quedará un remanente de S/ ${balance.toFixed(2)}`;
+      banner.textContent = `Cubierto. Remanente: S/ ${balance.toFixed(2)}`;
     }
   }
 
+  /* ================= MÓDULO 2: GASTOS HORMIGA ================= */
+  let listaHormigaData = JSON.parse(localStorage.getItem('gastos_hormiga') || '[]');
+
+  function agregarGastoHormiga() {
+    const monto = parseFloat(document.getElementById('hormigaMonto').value);
+    const desc = document.getElementById('hormigaDesc').value.trim();
+    const cat = document.getElementById('hormigaCat').value;
+
+    if (!monto || monto <= 0 || !desc) {
+      alert("Ingresa un monto válido y una descripción breve.");
+      return;
+    }
+
+    const nuevoGasto = {
+      id: Date.now(),
+      monto,
+      desc,
+      cat,
+      fecha: new Date().toLocaleDateString('es-PE', { day: '2-digit', month: 'short' })
+    };
+
+    listaHormigaData.unshift(nuevoGasto);
+    localStorage.setItem('gastos_hormiga', JSON.stringify(listaHormigaData));
+    
+    document.getElementById('hormigaMonto').value = '';
+    document.getElementById('hormigaDesc').value = '';
+    renderHormiga();
+  }
+
+  function eliminarGastoHormiga(id) {
+    listaHormigaData = listaHormigaData.filter(item => item.id !== id);
+    localStorage.setItem('gastos_hormiga', JSON.stringify(listaHormigaData));
+    renderHormiga();
+  }
+
+  function renderHormiga() {
+    const contenedor = document.getElementById('listaHormiga');
+    contenedor.innerHTML = '';
+
+    let total = 0;
+    listaHormigaData.forEach(item => {
+      total += item.monto;
+      const el = document.createElement('div');
+      el.className = 'list-item';
+      el.innerHTML = `
+        <div class="meta">
+          <span class="desc">${item.desc}</span>
+          <span class="tag">${item.cat} • ${item.fecha}</span>
+        </div>
+        <div style="display: flex; align-items: center;">
+          <span class="amount" style="color: var(--hormiga);">S/ ${item.monto.toFixed(2)}</span>
+          <button class="btn-del" onclick="eliminarGastoHormiga(${item.id})">✕</button>
+        </div>
+      `;
+      contenedor.appendChild(el);
+    });
+
+    document.getElementById('totalHormigaLabel').textContent = `Total: S/ ${total.toFixed(2)}`;
+  }
+
+  /* ================= MÓDULO 3: PROYECTOS ================= */
+  let proyectosData = JSON.parse(localStorage.getItem('app_proyectos') || JSON.stringify([
+    { id: 1, nombre: "Prototipo / Tesis", presupuesto: 150.00, items: [] }
+  ]));
+  let proyActivoId = proyectosData[0]?.id || null;
+
+  function abrirModalNuevoProyecto() {
+    document.getElementById('modalProyectoOverlay').style.display = 'flex';
+  }
+  function cerrarModalNuevoProyecto() {
+    document.getElementById('modalProyectoOverlay').style.display = 'none';
+  }
+
+  function guardarNuevoProyecto() {
+    const nombre = document.getElementById('nuevoProyNombre').value.trim();
+    const presupuesto = parseFloat(document.getElementById('nuevoProyPresupuesto').value) || 0;
+
+    if (!nombre) { alert("Indica un nombre para el proyecto."); return; }
+
+    const proy = { id: Date.now(), nombre, presupuesto, items: [] };
+    proyectosData.push(proy);
+    proyActivoId = proy.id;
+    localStorage.setItem('app_proyectos', JSON.stringify(proyectosData));
+    cerrarModalNuevoProyecto();
+    document.getElementById('nuevoProyNombre').value = '';
+    document.getElementById('nuevoProyPresupuesto').value = '';
+    renderProyectos();
+  }
+
+  function seleccionarProyectoActivo() {
+    proyActivoId = parseInt(document.getElementById('selectProyectos').value);
+    renderProyectos();
+  }
+
+  function eliminarProyectoActual() {
+    if (!confirm("¿Eliminar este proyecto y todas sus compras?")) return;
+    proyectosData = proyectosData.filter(p => p.id !== proyActivoId);
+    proyActivoId = proyectosData[0]?.id || null;
+    localStorage.setItem('app_proyectos', JSON.stringify(proyectosData));
+    renderProyectos();
+  }
+
+  function agregarGastoAProyecto() {
+    const desc = document.getElementById('proyItemDesc').value.trim();
+    const costo = parseFloat(document.getElementById('proyItemCosto').value);
+
+    if (!desc || !costo || costo <= 0) {
+      alert("Indica qué compraste y el costo.");
+      return;
+    }
+
+    const proy = proyectosData.find(p => p.id === proyActivoId);
+    if (!proy) return;
+
+    proy.items.unshift({ id: Date.now(), desc, costo, fecha: new Date().toLocaleDateString('es-PE') });
+    localStorage.setItem('app_proyectos', JSON.stringify(proyectosData));
+
+    document.getElementById('proyItemDesc').value = '';
+    document.getElementById('proyItemCosto').value = '';
+    renderProyectos();
+  }
+
+  function eliminarItemProyecto(itemId) {
+    const proy = proyectosData.find(p => p.id === proyActivoId);
+    if (!proy) return;
+    proy.items = proy.items.filter(i => i.id !== itemId);
+    localStorage.setItem('app_proyectos', JSON.stringify(proyectosData));
+    renderProyectos();
+  }
+
+  function renderProyectos() {
+    const select = document.getElementById('selectProyectos');
+    select.innerHTML = '';
+
+    proyectosData.forEach(p => {
+      const opt = document.createElement('option');
+      opt.value = p.id;
+      opt.textContent = p.nombre;
+      if (p.id === proyActivoId) opt.selected = true;
+      select.appendChild(opt);
+    });
+
+    const cardDetalle = document.getElementById('cardDetalleProyecto');
+    const proy = proyectosData.find(p => p.id === proyActivoId);
+
+    if (!proy) {
+      cardDetalle.style.display = 'none';
+      return;
+    }
+    cardDetalle.style.display = 'block';
+
+    let totalGastado = proy.items.reduce((acc, i) => acc + i.costo, 0);
+    let restante = proy.presupuesto - totalGastado;
+    let pct = proy.presupuesto > 0 ? Math.min(100, (totalGastado / proy.presupuesto) * 100) : 0;
+
+    document.getElementById('proyNombreDisplay').textContent = proy.nombre;
+    document.getElementById('proyPresupuestoDisplay').textContent = `Techo: S/ ${proy.presupuesto.toFixed(2)}`;
+    document.getElementById('proyGastadoDisplay').textContent = `Gastado: S/ ${totalGastado.toFixed(2)}`;
+    document.getElementById('proyRestanteDisplay').textContent = `Margen: S/ ${restante.toFixed(2)}`;
+
+    const bar = document.getElementById('proyBarraProgreso');
+    bar.style.width = `${pct}%`;
+    bar.style.background = pct >= 90 ? 'var(--danger)' : 'var(--proyecto)';
+
+    const lista = document.getElementById('listaItemsProyecto');
+    lista.innerHTML = '';
+    proy.items.forEach(item => {
+      const el = document.createElement('div');
+      el.className = 'list-item';
+      el.innerHTML = `
+        <div class="meta">
+          <span class="desc">${item.desc}</span>
+          <span class="tag">${item.fecha}</span>
+        </div>
+        <div style="display: flex; align-items: center;">
+          <span class="amount" style="color: var(--proyecto);">S/ ${item.costo.toFixed(2)}</span>
+          <button class="btn-del" onclick="eliminarItemProyecto(${item.id})">✕</button>
+        </div>
+      `;
+      lista.appendChild(el);
+    });
+  }
+
+  /* ================= MÓDULO 4: RESUMEN GLOBAL ================= */
+  function renderResumenGlobal() {
+    calcularTodoTransporte();
+
+    let totalHormiga = listaHormigaData.reduce((acc, i) => acc + i.monto, 0);
+    
+    let totalProyectos = 0;
+    proyectosData.forEach(p => {
+      totalProyectos += p.items.reduce((acc, i) => acc + i.costo, 0);
+    });
+
+    document.getElementById('globalTransporte').textContent = `S/ ${totalTransporteProyectado.toFixed(2)}`;
+    document.getElementById('globalHormiga').textContent = `S/ ${totalHormiga.toFixed(2)}`;
+    document.getElementById('globalProyectos').textContent = `S/ ${totalProyectos.toFixed(2)}`;
+
+    const granTotal = totalTransporteProyectado + totalHormiga + totalProyectos;
+    document.getElementById('granTotalGlobal').textContent = `S/ ${granTotal.toFixed(2)}`;
+  }
+
+  /* Inicialización */
   window.onload = () => {
-    document.getElementById('baseIdaMicro').value = (config.idaMicro ?? 1.50).toFixed(2);
-    document.getElementById('baseIdaMetro').value = (config.idaMetro ?? 3.20).toFixed(2);
-    document.getElementById('baseVueltaMetro').value = (config.vueltaMetro ?? 3.20).toFixed(2);
-    document.getElementById('baseVueltaMicro').value = (config.vueltaMicro ?? 1.50).toFixed(2);
-    document.getElementById('saldoActual').value = (config.saldo ?? 50.00).toFixed(2);
-    calcularTodo();
+    document.getElementById('baseIdaMicro').value = (confTrans.idaMicro ?? 1.50).toFixed(2);
+    document.getElementById('baseIdaMetro').value = (confTrans.idaMetro ?? 3.20).toFixed(2);
+    document.getElementById('baseVueltaMetro').value = (confTrans.vueltaMetro ?? 3.20).toFixed(2);
+    document.getElementById('baseVueltaMicro').value = (confTrans.vueltaMicro ?? 1.50).toFixed(2);
+    document.getElementById('saldoActual').value = (confTrans.saldo ?? 50.00).toFixed(2);
+
+    calcularTodoTransporte();
+    renderHormiga();
+    renderProyectos();
   };
 </script>
 </body>
