@@ -3,15 +3,20 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Pasajes: Micro & Metropolitano</title>
+  <title>Control de Pasajes</title>
+  
+  <!-- Soporte PWA para Android -->
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#0b0f19" />
+
   <style>
     :root {
       --bg: #0b0f19;
       --card: #151d2e;
       --card-alt: #1c273d;
       --accent: #38bdf8;
-      --metro: #f59e0b; /* Ámbar Metropolitano */
-      --micro: #3b82f6; /* Azul Micro */
+      --metro: #f59e0b;
+      --micro: #3b82f6;
       --success: #22c55e;
       --danger: #ef4444;
       --text: #f8fafc;
@@ -23,16 +28,61 @@
     .app { width: 100%; max-width: 480px; display: flex; flex-direction: column; gap: 12px; padding-bottom: 30px; }
 
     .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 12px; }
-    .card-title { font-size: 0.75rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; display: flex; justify-content: space-between; }
+    .card-title { font-size: 0.75rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; display: flex; justify-content: space-between; }
 
-    /* Entradas base */
-    .tramos-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
-    .tramo-box { background: var(--card-alt); border: 1px solid var(--border); border-radius: 8px; padding: 8px; }
-    .tramo-box h4 { font-size: 0.75rem; color: var(--accent); margin-bottom: 6px; }
-    .field-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; font-size: 0.75rem; }
-    .field-row input { width: 65px; background: #0b0f19; border: 1px solid var(--border); border-radius: 6px; color: #fff; padding: 4px; font-size: 0.8rem; text-align: right; }
+    /* Estructura alineada para tarifas */
+    .tramos-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+    .tramo-box { background: var(--card-alt); border: 1px solid var(--border); border-radius: 8px; padding: 10px; }
+    .tramo-box h4 { font-size: 0.8rem; color: var(--accent); margin-bottom: 8px; text-align: center; }
+    
+    /* Filas alineadas con Grid */
+    .field-row { 
+      display: grid; 
+      grid-template-columns: 1fr 58px; 
+      align-items: center; 
+      gap: 6px; 
+      margin-bottom: 6px; 
+      font-size: 0.75rem; 
+    }
+    .field-row span {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: #cbd5e1;
+    }
+    .field-row input { 
+      width: 100%; 
+      background: #0b0f19; 
+      border: 1px solid var(--border); 
+      border-radius: 6px; 
+      color: #fff; 
+      padding: 5px 4px; 
+      font-size: 0.85rem; 
+      text-align: right; 
+    }
 
-    /* Saldo y Resumen */
+    .saldo-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--card-alt);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 10px;
+    }
+    .saldo-row span { font-size: 0.8rem; font-weight: 600; }
+    .saldo-row input {
+      width: 85px;
+      background: #0b0f19;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: #fff;
+      padding: 5px 6px;
+      font-size: 0.9rem;
+      text-align: right;
+    }
+
+    /* Resumen Ciclo */
     .summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
     .stat-box { background: var(--card-alt); border: 1px solid var(--border); border-radius: 8px; padding: 8px; text-align: center; }
     .stat-box .title { font-size: 0.65rem; color: var(--muted); }
@@ -66,9 +116,9 @@
     /* Modal */
     .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); display: none; align-items: center; justify-content: center; z-index: 100; padding: 16px; }
     .modal { background: var(--card); border: 1px solid var(--border); border-radius: 12px; width: 100%; max-width: 330px; padding: 16px; }
-    .modal h4 { font-size: 0.95rem; color: var(--accent); margin-bottom: 12px; }
-    .modal-section { margin-bottom: 10px; }
-    .modal-section-title { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; font-weight: 700; margin-bottom: 4px; }
+    .modal h4 { font-size: 0.95rem; color: var(--accent); margin-bottom: 12px; text-align: center; }
+    .modal-section { margin-bottom: 10px; background: var(--card-alt); padding: 8px; border-radius: 8px; border: 1px solid var(--border); }
+    .modal-section-title { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; font-weight: 700; margin-bottom: 6px; }
     .modal-actions { display: flex; gap: 8px; margin-top: 14px; }
     .btn { flex: 1; padding: 8px; border-radius: 6px; border: none; font-weight: 700; font-size: 0.8rem; cursor: pointer; }
     .btn-primary { background: var(--accent); color: #090d16; }
@@ -81,36 +131,42 @@
   <!-- Configuración habitual -->
   <div class="card">
     <div class="card-title">
-      <span>Tarifas Habituales (Lun a Vie)</span>
-      <span style="color: var(--accent);" id="labelGastoDiarioBase">Total: S/ 0.00</span>
+      <span>Tarifas Habituales</span>
+      <span style="color: var(--accent);" id="labelGastoDiarioBase">Diario: S/ 0.00</span>
     </div>
+    
     <div class="tramos-grid">
+      <!-- IDA -->
       <div class="tramo-box">
         <h4>Ida</h4>
         <div class="field-row">
-          <span>Micro:</span>
+          <span>Micro</span>
           <input type="number" id="baseIdaMicro" step="0.10" value="1.50" onchange="guardarBase()" />
         </div>
         <div class="field-row">
-          <span>Metropolitano:</span>
+          <span>Metropolitano</span>
           <input type="number" id="baseIdaMetro" step="0.10" value="3.20" onchange="guardarBase()" />
         </div>
       </div>
+
+      <!-- VUELTA -->
       <div class="tramo-box">
         <h4>Vuelta</h4>
         <div class="field-row">
-          <span>Metropolitano:</span>
+          <span>Metropolitano</span>
           <input type="number" id="baseVueltaMetro" step="0.10" value="3.20" onchange="guardarBase()" />
         </div>
         <div class="field-row">
-          <span>Micro:</span>
+          <span>Micro</span>
           <input type="number" id="baseVueltaMicro" step="0.10" value="1.50" onchange="guardarBase()" />
         </div>
       </div>
     </div>
-    <div class="field-row" style="margin-top: 4px;">
-      <span style="font-size: 0.8rem; font-weight: 600;">Saldo en mano / tarjeta:</span>
-      <input type="number" id="saldoActual" step="0.50" value="50.00" style="width: 90px;" onchange="calcularTodo()" />
+
+    <!-- Saldo disponible -->
+    <div class="saldo-row">
+      <span>Saldo disponible (tarjeta/mano)</span>
+      <input type="number" id="saldoActual" step="0.50" value="50.00" onchange="calcularTodo()" />
     </div>
   </div>
 
@@ -152,7 +208,7 @@
   </div>
 </div>
 
-<!-- Modal para personalizar día -->
+<!-- Modal para personalizar día puntual -->
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal">
     <h4 id="modalFechaTitulo">Configurar Día</h4>
@@ -160,11 +216,11 @@
     <div class="modal-section">
       <div class="modal-section-title">Ida</div>
       <div class="field-row">
-        <span>Micro:</span>
+        <span>Micro</span>
         <input type="number" id="modIdaMicro" step="0.10" />
       </div>
       <div class="field-row">
-        <span>Metropolitano:</span>
+        <span>Metropolitano</span>
         <input type="number" id="modIdaMetro" step="0.10" />
       </div>
     </div>
@@ -172,11 +228,11 @@
     <div class="modal-section">
       <div class="modal-section-title">Vuelta</div>
       <div class="field-row">
-        <span>Metropolitano:</span>
+        <span>Metropolitano</span>
         <input type="number" id="modVueltaMetro" step="0.10" />
       </div>
       <div class="field-row">
-        <span>Micro:</span>
+        <span>Micro</span>
         <input type="number" id="modVueltaMicro" step="0.10" />
       </div>
     </div>
@@ -198,7 +254,6 @@
   let anioVisual = new Date().getFullYear();
   let diaSeleccionadoKey = null;
 
-  // Carga inicial
   let config = JSON.parse(localStorage.getItem('transporte_config') || JSON.stringify({
     idaMicro: 1.50,
     idaMetro: 3.20,
@@ -207,7 +262,6 @@
     saldo: 50.00
   }));
 
-  // Estructura: { 'YYYY-MM-DD': { idaMicro, idaMetro, vueltaMetro, vueltaMicro } }
   let diasCustom = JSON.parse(localStorage.getItem('dias_custom_transporte') || '{}');
 
   function formatoKey(d) {
@@ -223,7 +277,6 @@
       return { ...diasCustom[key], custom: true };
     }
     const dayOfWeek = fecha.getDay();
-    // Fines de semana en 0 por defecto
     if (dayOfWeek === 0 || dayOfWeek === 6) {
       return { idaMicro: 0, idaMetro: 0, vueltaMetro: 0, vueltaMicro: 0, custom: false };
     }
@@ -365,7 +418,6 @@
 
     renderCalendario();
 
-    // Corte al 20
     const hoy = new Date();
     const diaActual = hoy.getDate();
     let fechaFin;
